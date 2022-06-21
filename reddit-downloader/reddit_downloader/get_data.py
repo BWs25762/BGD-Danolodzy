@@ -27,6 +27,9 @@ def get_data(**kwargs):
     subreddit: str = kwargs.pop("subreddit", ""),
     post_handler: Callable[[dict], Any] = kwargs.pop("post_handler", lambda x: pp(x))
 
+    if kwargs:
+        raise ValueError(f"illegal arguments provided {kwargs}")
+
     if not count and not end_time:
         raise ValueError("provide either count or end_time!")
 
@@ -36,15 +39,19 @@ def get_data(**kwargs):
         end_time = int((end_time - UTC_TIME_DELTA).timestamp())
 
     start_time = int((start_time - UTC_TIME_DELTA).timestamp())
-
     if start_time > end_time:
         raise ValueError("start_time cannot be bigger than end_time!")
+    
+    
+    
 
     last_post_time = start_time
     last_post_id = None
     total_count = 0
-
+    previous_last_post_id = "0"
     while total_count < count and last_post_time < end_time:
+        print(total_count, "of", count)
+        print(last_post_time, "before", end_time)
         params = {
             "query": query,
             "after": start_time,
@@ -65,10 +72,14 @@ def get_data(**kwargs):
         total_count += len(post_list)
         last_post = post_list[-1]
         last_post_id = last_post["id"]
+        if last_post_id == previous_last_post_id:
+            break
         last_post_time = last_post["created_utc"]
+        start_time = last_post_time
+        previous_last_post_id = last_post_id
         for post in post_list:
             post_handler(post)
-    return last_post_id
+    return last_post
 
 
 def save_post(post):
@@ -93,6 +104,7 @@ def main():
     parser.add_argument("--subreddit", type=str, default="", required=False)
     parser.add_argument("--post_handler", type=lambda s: post_handlers[s], default=pp, required=False)
     args = parser.parse_args()
+    pp(vars(args))
     get_data(**vars(args))
 
 
