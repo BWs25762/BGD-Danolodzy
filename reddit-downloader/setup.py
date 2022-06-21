@@ -1,14 +1,14 @@
 from setuptools import setup
 
 setup(
-    name="reddit-downloader",
-    version="0.0.1",
+    name="reddit_downloader",
+    version="0.0.2",
     description="download reddit data",
     maintainer="Bartosz Włodarczyk",
     maintainer_email="s25762@pjwstk.edu.pl",
-    packages=["reddit-downloader"],
+    packages=["reddit_downloader"],
     install_requires=["requests"],
     classifiers=[],
     include_package_data = True,
-    package_data={"reddit-downloader":["./reddit-downloader/*"]}
+    package_data={"reddit_downloader":["./reddit-downloader/*"]}
 )
