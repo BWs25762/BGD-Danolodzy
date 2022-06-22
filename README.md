@@ -26,3 +26,18 @@ aktualnie wspierane argumenty:
 --count
 --subreddit 
 --post_handler
+
+## MongoDb container(Windows) 
+### Prerequisites 
+- docker installed
+- create mongodb directory in C folder -> C:\mongodb
+- inside mongodb create db directory -> C:\mongodb\db
+
+### How to run 
+In terminal(ex. powershell) run 
+```
+docker-compose up
+```
+To shut down container press ctrl+c
+
+
