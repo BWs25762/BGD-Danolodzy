@@ -7,7 +7,7 @@ setup(
     maintainer="Bartosz Włodarczyk",
     maintainer_email="s25762@pjwstk.edu.pl",
     packages=["reddit_downloader"],
-    install_requires=["requests"],
+    install_requires=["requests", "pymongo"],
     classifiers=[],
     include_package_data = True,
     package_data={"reddit_downloader":["./reddit-downloader/*"]}
