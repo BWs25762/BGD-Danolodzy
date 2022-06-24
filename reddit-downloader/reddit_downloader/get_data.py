@@ -45,7 +45,7 @@ def get_data(**kwargs):
     total_count = 0
     previous_last_post_id = "0"
     time_to_do = end_time - start_time
-    initial_start_time = int(str(start_time))
+    initial_start_time = start_time
     while total_count < count and last_post_time < end_time:
         print(f"count done:\t{int((total_count/count)*100)}%")
         print(f"time done:\t{int(((last_post_time - initial_start_time)/time_to_do)*100)}%")
@@ -81,7 +81,7 @@ def get_data(**kwargs):
             post_handler(post)
         print(f"handling post batch took: {(timer() - start)}")
         with open("last_post_time","w") as f:
-            f.write(last_post_time)
+            f.write(str(last_post_time))
     return last_post
 
 
