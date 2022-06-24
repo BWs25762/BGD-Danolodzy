@@ -1,3 +1,4 @@
+from turtle import st
 import requests
 from pprint import pprint as pp
 import argparse
@@ -5,17 +6,12 @@ from datetime import datetime
 from typing import Callable, Any
 import json
 import os
+from reddit_downloader.mongo_inserter import MongoInserter
+from timeit import default_timer as timer
+
 
 UTC_TIME_DELTA = datetime.now() - datetime.utcnow()
 MIN_DATETIME = datetime.fromisoformat('2010-01-01')
-
-
-def get_comments(query: str, params: dict):
-    r = requests.get(f"https://api.pushshift.io/reddit/search/comment/", params=params)
-    lis = r.json()["data"]
-    pp(lis[0])
-    print(len(lis))
-    pp(r.headers)
 
 
 def get_data(**kwargs):
@@ -43,25 +39,29 @@ def get_data(**kwargs):
         raise ValueError("start_time cannot be bigger than end_time!")
     
     
-    
 
     last_post_time = start_time
     last_post_id = None
     total_count = 0
     previous_last_post_id = "0"
+    time_to_do = end_time - start_time
+    initial_start_time = start_time
     while total_count < count and last_post_time < end_time:
-        print(total_count, "of", count)
-        print(last_post_time, "before", end_time)
+        print(f"collected posts:\t{total_count}")
+        print(f"count done:\t{int((total_count/count)*100)}%")
+        print(f"time done:\t{int(((last_post_time - initial_start_time)/time_to_do)*100)}%")
         params = {
             "query": query,
             "after": start_time,
             "after_id": last_post_id,
-            "size": 500,
+            "size": 100,
             "subreddit": subreddit,
         }
+        start = timer()
         r = requests.get(
             f"https://api.pushshift.io/reddit/search/{type}/", params=params
         )
+        print(f"downloading data took: {timer() - start}")
         if r.status_code != 200:
             # TODO handle status errors
             pass
@@ -77,8 +77,12 @@ def get_data(**kwargs):
         last_post_time = last_post["created_utc"]
         start_time = last_post_time
         previous_last_post_id = last_post_id
+        start = timer()
         for post in post_list:
             post_handler(post)
+        print(f"handling post batch took: {(timer() - start)}")
+        with open("last_post_time","w") as f:
+            f.write(str(last_post_time))
     return last_post
 
 
@@ -90,21 +94,24 @@ def save_post(post):
 
 
 def main():
+    mongo_inserter = MongoInserter()
     post_handlers = {
         "save": save_post,
         "print": lambda x: print(x),
-        "pprint": lambda x: pp(x)
+        "pprint": lambda x: pp(x),
+        "mongo_save": mongo_inserter.insert_one
     }
     parser = argparse.ArgumentParser()
     parser.add_argument("--query", type=str, default="", required=False)
     parser.add_argument("--start_time", type=lambda s: datetime.strptime(s, "%d-%m-%Y"), default=MIN_DATETIME, required=False)
     parser.add_argument("--end_time", type=lambda s: datetime.strptime(s, "%d-%m-%Y"), default=datetime.now(), required=False)
     parser.add_argument("--type", type=str, default="submission", required=False)
-    parser.add_argument("--count", type=int, default=99, required=False)
+    parser.add_argument("--count", type=int, default=100, required=False)
     parser.add_argument("--subreddit", type=str, default="", required=False)
     parser.add_argument("--post_handler", type=lambda s: post_handlers[s], default=pp, required=False)
     args = parser.parse_args()
     pp(vars(args))
+    mongo_inserter.set_collection(args.type)
     get_data(**vars(args))
 
 
