@@ -47,6 +47,7 @@ def get_data(**kwargs):
     time_to_do = end_time - start_time
     initial_start_time = start_time
     while total_count < count and last_post_time < end_time:
+        print(f"collected posts:\t{total_count}")
         print(f"count done:\t{int((total_count/count)*100)}%")
         print(f"time done:\t{int(((last_post_time - initial_start_time)/time_to_do)*100)}%")
         params = {
