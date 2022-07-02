@@ -19,13 +19,14 @@ pip install reddit-downloader/.
 python -m reddit_downloader.get_data --argument wartość
 ```
 aktualnie wspierane argumenty:
---query
---start_time
---end_time
---type
---count
---subreddit 
---post_handler
+--query \
+--start_time \
+--end_time \
+--type \
+--count \
+--subreddit  \
+--post_handler \
+--min_score \
 
 ## MongoDb container(Windows) 
 ### Prerequisites 
